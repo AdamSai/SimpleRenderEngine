@@ -45,6 +45,7 @@ add_subdirectory(gui)
 add_subdirectory(Exercise_1-6)
 add_subdirectory(Ex2_Cpp_Foundation)
 add_subdirectory(Ex3_Cpp_Pointers)
+add_subdirectory(Ex4_Sprites)
 
 IF (USE_BULLET)
 	add_subdirectory(3D_Scenegraph)

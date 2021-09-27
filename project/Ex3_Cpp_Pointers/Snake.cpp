@@ -20,8 +20,8 @@ void Snake::move()
 
 	while (current != nullptr)
 	{
-		int tempX = current->x;
-		int tempY = current->y;
+		const int tempX = current->x;
+		const int tempY = current->y;
 
 		current->x = previousX;
 		current->y = previousY;
@@ -57,11 +57,9 @@ void Snake::init(int initialLength, int x, int y, int moveX, int moveY)
 	this->moveX = moveX;
 	this->moveY = moveY;
 
-	if (snakeHead != nullptr)
-	{
-		delete this->snakeHead;
-	}
-	// TODO clean up and initialize the new snake. Make sure not to leak memory.
+
+	delete this->snakeHead;
+
 	snakeHead = new SnakeBody(x, y);
 	SnakeBody* current = snakeHead;
 
@@ -80,7 +78,6 @@ void Snake::init(int initialLength, int x, int y, int moveX, int moveY)
 // Should increment the length and append a SnakeBody
 void Snake::grow()
 {
-	// TODO add a SnakeBody to the snake.
 	SnakeBody* current = this->snakeHead;
 	while (true)
 	{
@@ -91,15 +88,12 @@ void Snake::grow()
 			break;
 		}
 		current = current->next;
-
 	}
-
 }
 
 // Returns true if the snake collides with itself
 bool Snake::collide(int x, int y)
 {
-	// TODO check if there is any snake segment at coord (x,y) and return true if that is the case
 	SnakeBody* current = this->snakeHead;
 	while (current->next != nullptr)
 	{
