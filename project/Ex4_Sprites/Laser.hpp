@@ -6,16 +6,17 @@
 class Laser : public GameObject, public Collidable
 {
 public:
-	Laser(const sre::Sprite &sprite, glm::vec2 position, float rotation);
+	Laser(int id, const sre::Sprite &sprite, glm::vec2 position, glm::vec2 vel, float rotation, AsteroidsGame* game);
+	int id;
 	void update(float deltaTime) override;
 	void onCollision(std::shared_ptr<GameObject> other) override;
-	virtual ~Laser();
 	time_t spawnTime;
+	AsteroidsGame* game;
 
 
 private:
-    glm::vec2 winSize;
-	glm::vec2 velocity;
+    glm::vec2 winSize{};
+	glm::vec2 velocity{};
 
 
 

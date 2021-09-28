@@ -5,19 +5,20 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 
+#include "SpaceShip.hpp"
 #include "sre/Renderer.hpp"
 
-Laser::Laser(const sre::Sprite& sprite, glm::vec2 position, float rotation) : GameObject(sprite)
+Laser::Laser(int id, const sre::Sprite& sprite, glm::vec2 position, glm::vec2 vel, float rotation, AsteroidsGame* game) : GameObject(sprite)
 {
+	this->id = id;
 	winSize = sre::Renderer::instance->getDrawableSize();
 	radius = 5;
 	spawnTime = time(nullptr);
 	this->position = position;
 	this->rotation = rotation;
-	int velocityFactor = 300; // How much should we multiply to the velocity
-	//velocity = normalizedPos * rotation;
-	glm::vec2 direction = glm::rotateZ(glm::vec3(0, 5, 0), glm::radians(rotation));
-	velocity = glm::vec2(direction.x * velocityFactor, direction.y * velocityFactor);
+	this->game = game;
+	//velocity = glm::vec2(direction.x * velocityFactor, direction.y * velocityFactor);
+	velocity = vel;
 	//velocity = glm::rotateZ(glm::vec3(0,100,0), glm::radians(rotation));
 
 
@@ -50,9 +51,9 @@ void Laser::update(float deltaTime)
 
 void Laser::onCollision(std::shared_ptr<GameObject> other)
 {
-	std::cout << "collided" << std::endl;
+	auto player = std::dynamic_pointer_cast<SpaceShip>(other);
+	if(player != nullptr)
+		return;
+	game->destroyLaser(this);
 }
 
-Laser::~Laser()
-{
-}
