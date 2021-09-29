@@ -1,6 +1,10 @@
 ﻿#include <ctime>
 #include <glm/gtc/constants.hpp>
 #include "AsteroidsGame.hpp"
+#include "sre/Texture.hpp"
+#include "sre/Renderer.hpp"
+#include "sre/Material.hpp"
+#include "sre/SDLRenderer.hpp"
 
 #include "Asteroid.hpp"
 #include "GameObject.hpp"
@@ -24,11 +28,7 @@ AsteroidsGame::AsteroidsGame()
 	atlas = SpriteAtlas::create("asteroids.json", "asteroids.png");
 
 	restartGame();
-	//gameObjects.push_back(std::make_shared<SpaceShip>(bangSprite));
-	//gameObjects.push_back(std::make_shared<SpaceShip>(bigMeteorSprite));
-	//gameObjects.push_back(std::make_shared<SpaceShip>(mediumMeteorSprite));
-	//gameObjects.push_back(std::make_shared<SpaceShip>(smallMeteorSprite));
-	//gameObjects.push_back(std::make_shared<SpaceShip>(laserSprite));
+
 
 	camera.setWindowCoordinates();
 
@@ -50,99 +50,88 @@ AsteroidsGame::AsteroidsGame()
 
 void AsteroidsGame::fireLaser(glm::vec2 pos, glm::vec2 vel, float rot)
 {
-	auto laser = std::make_shared<Laser>(gameObjects.size() - 1, atlas->get("laserRed15.png"), pos, vel, rot, this);
+	auto laser = std::make_shared<Laser>(atlas->get("laserRed15.png"), pos, vel, rot, this);
 	gameObjects.push_back(laser);
 }
 
-void AsteroidsGame::destroyLaser(Laser* laser)
+
+void AsteroidsGame::destroyGameObject(GameObject* gameObject)
 {
 	for (int i = 0; i < gameObjects.size(); i++)
 	{
-		auto otherLaser = std::dynamic_pointer_cast<Laser>(gameObjects[i]);
-		if (laser == nullptr || otherLaser == nullptr)
-			continue;
-		if (laser->id == otherLaser->id)
+		if (gameObject == gameObjects[i].get())
 		{
 			gameObjects.erase(gameObjects.begin() + i);
-			break;
+			return;
 		}
 	}
 }
 
 void AsteroidsGame::destroyAsteroid(Asteroid* asteroid)
 {
-	for (int i = 0; i < gameObjects.size(); i++)
+	if (asteroid->size == Asteroid::AsteroidSize::Medium)
 	{
-		auto otherAsteroid = std::dynamic_pointer_cast<Asteroid>(gameObjects[i]);
-		if (asteroid == nullptr || otherAsteroid == nullptr)
-			continue;
-		if (asteroid->id == otherAsteroid->id)
-		{
-			if (asteroid->size == Asteroid::Medium)
-			{
-				spawnAsteroid(Asteroid::Small, asteroid->position);
-			}
-			else if (asteroid->size == Asteroid::Big)
-			{
-				spawnAsteroid(Asteroid::Medium, asteroid->position);
-			}
-			score++;
-			gameObjects.erase(gameObjects.begin() + i);
-			break;
-		}
+		spawnAsteroid(Asteroid::AsteroidSize::Small, asteroid->position);
 	}
+	else if (asteroid->size == Asteroid::AsteroidSize::Big)
+	{
+		spawnAsteroid(Asteroid::AsteroidSize::Medium, asteroid->position);
+	}
+	destroyGameObject(asteroid);
+
 }
 
-void AsteroidsGame::spawnAsteroid(Asteroid::asteroidSize size, glm::vec2 pos)
+void AsteroidsGame::spawnAsteroid(Asteroid::AsteroidSize size, glm::vec2 pos = glm::vec2(-1, -1))
 {
 
 	switch (size)
 	{
-	case Asteroid::Small:
+	case Asteroid::AsteroidSize::Small:
 	{
 		auto smallMeteorSprite = atlas->get("meteorBrown_small1.png");
-		gameObjects.push_back(std::make_shared<Asteroid>(smallMeteorSprite, this, Asteroid::Small, pos));
-		gameObjects.push_back(std::make_shared<Asteroid>(smallMeteorSprite, this, Asteroid::Small, pos));
+		gameObjects.push_back(std::make_shared<Asteroid>(smallMeteorSprite, this, Asteroid::AsteroidSize::Small, pos));
+		gameObjects.push_back(std::make_shared<Asteroid>(smallMeteorSprite, this, Asteroid::AsteroidSize::Small, pos));
 		break;
 	}
 
 
-	case Asteroid::Medium:
+	case Asteroid::AsteroidSize::Medium:
 	{
 		auto mediumMeteorSprite = atlas->get("meteorBrown_med1.png");
-		gameObjects.push_back(std::make_shared<Asteroid>(mediumMeteorSprite, this, Asteroid::Medium, pos));
-		gameObjects.push_back(std::make_shared<Asteroid>(mediumMeteorSprite, this, Asteroid::Medium, pos));
+		gameObjects.push_back(std::make_shared<Asteroid>(mediumMeteorSprite, this, Asteroid::AsteroidSize::Medium, pos));
+		gameObjects.push_back(std::make_shared<Asteroid>(mediumMeteorSprite, this, Asteroid::AsteroidSize::Medium, pos));
 		break;
 	}
 
-	case Asteroid::Big:
+	case Asteroid::AsteroidSize::Big: // For big bois we just need to spawn one, since they are created out of thin air
 	{
 		auto bigMeteorSprite = atlas->get("meteorBrown_big1.png");
-		gameObjects.push_back(std::make_shared<Asteroid>(bigMeteorSprite, this, Asteroid::Big, pos));
-		gameObjects.push_back(std::make_shared<Asteroid>(bigMeteorSprite, this, Asteroid::Big, pos));
+		gameObjects.push_back(std::make_shared<Asteroid>(bigMeteorSprite, this, Asteroid::AsteroidSize::Big));
 		break;
 	}
 
 	}
 }
 
-void AsteroidsGame::destroySpaceShip()
+void AsteroidsGame::destroySpaceShip(GameObject* gameObject)
 {
-	for (int i = 0; i < gameObjects.size(); i++)
-	{
-		auto spaceShip = std::dynamic_pointer_cast<SpaceShip>(gameObjects[i]);
-		if (spaceShip != nullptr)
-		{
-			playerIsAlive = false;
-			// create bang
-			auto bang = std::make_shared<GameObject>(atlas->get("bang.png"));
-			bang->position = spaceShip->position;
-			gameObjects.push_back(bang);
-			// Destroy space ship
-			gameObjects.erase(gameObjects.begin() + i);
-			break;
-		}
-	}
+	playerIsAlive = false;
+	const auto bang = std::make_shared<GameObject>(atlas->get("bang.png"));
+	bang->position = gameObject->position;
+	gameObjects.push_back(bang);
+	destroyGameObject(gameObject);
+}
+
+
+using namespace std::chrono;
+long long AsteroidsGame::GetCurrentTimeMillis() const
+{
+	return std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+float AsteroidsGame::getRandomFloat(float min, float max)
+{
+	return (min + 1) + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max - (min + 1));
 }
 
 void AsteroidsGame::update(float deltaTime)
@@ -151,8 +140,10 @@ void AsteroidsGame::update(float deltaTime)
 	for (int i = 0; i < size; i++)
 	{
 		size = gameObjects.size();
-		if (i >= size)
+		if (i >= size) // Since lasers get deleted over time AND on collision, we have to make sure we don't go out of bounds
 			break;
+
+		// Is the object we are looking at a collidable? If so check for collisions against other collidables.
 		auto collidable = std::dynamic_pointer_cast<Collidable>(gameObjects[i]);
 		if (collidable != nullptr)
 		{
@@ -163,22 +154,29 @@ void AsteroidsGame::update(float deltaTime)
 					continue;
 				if (i >= size || j >= size) // Since lasers get deleted over time AND on collision, we have to make sure we don't go out of bounds
 					break;
-				auto objA = gameObjects[i];
-				auto objB = gameObjects[j];
-				auto otherCollidable = std::dynamic_pointer_cast<Collidable>(objB);
+
+				// We need position from GameObject class and we need to pass the GameObjects to the collision methods.
+				const auto current = gameObjects[i];
+				const auto other = gameObjects[j];
+
+				// If the other object also is a collidable we check if they actually collide
+				auto otherCollidable = std::dynamic_pointer_cast<Collidable>(other);
 				if (collidable == nullptr || otherCollidable == nullptr)
 					continue;
-				const float distance = glm::distance(objA->position, objB->position);
+				// If they collide we tell each object what they are colliding with
+				const float distance = glm::distance(current->position, other->position);
 				if (distance <= collidable->getRadius() + otherCollidable->getRadius())
 				{
-					collidable->onCollision(objB);
-					otherCollidable->onCollision(objA);
+					collidable->onCollision(other);
+					otherCollidable->onCollision(current);
 				}
 
 			}
 
 		}
 	}
+
+	// Call update method for all game objects and check if lasers should be killed
 	for (int i = 0; i < gameObjects.size(); i++)
 	{
 		gameObjects[i]->update(deltaTime);
@@ -190,16 +188,6 @@ void AsteroidsGame::update(float deltaTime)
 				gameObjects.erase(gameObjects.begin() + i);
 		}
 	}
-
-	//for (int i = 0; i < lasers.size(); i++)
-	//{
-	//	if (lasers[i] != nullptr && time(nullptr) - lasers[i]->spawnTime >= 1)
-	//	{
-
-	//		std::cout << "Deleting laser" << std::endl;
-	//		lasers[i].~shared_ptr();
-	//	}
-	//}
 }
 
 
@@ -227,14 +215,21 @@ void AsteroidsGame::render()
 {
 	auto renderPass = RenderPass::create()
 		.withCamera(camera)
-		.withClearColor(true, { .20, .60, .86, 1 })
+		.withClearColor(true, { 0, 0, .30, 1 })
 		.build();
 	auto spriteBatchBuilder = SpriteBatch::create();
+	for (int i = 0; i < backgroundSprites.size(); i++)
+	{
+		backgroundSprites[i]->render(spriteBatchBuilder);
+	}
 
 	for (int i = 0; i < gameObjects.size(); i++)
 	{
 		gameObjects[i]->render(spriteBatchBuilder);
 	}
+
+
+
 	auto spriteBatch = spriteBatchBuilder.build();
 	renderPass.draw(spriteBatch);
 
@@ -253,9 +248,10 @@ void AsteroidsGame::render()
 	}
 
 	ImGui::SetNextWindowPos(ImVec2(Renderer::instance->getWindowSize().x / 2 - 100, .0f), ImGuiSetCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(200, 70), ImGuiSetCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_Always);
 	ImGui::Begin("Score_and_Tracker", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
 	ImGui::LabelText("GOs", "%i", (int)gameObjects.size());
+	ImGui::LabelText("Stars", "%i", (int)backgroundSprites.size());
 	ImGui::LabelText("Score", "%i", score);
 	ImGui::End();
 
@@ -263,15 +259,15 @@ void AsteroidsGame::render()
 	{
 		ImGui::SetNextWindowPos(ImVec2(Renderer::instance->getWindowSize().x / 2 - 125, Renderer::instance->getWindowSize().y / 2 - 100), ImGuiSetCond_Always);
 		ImGui::SetNextWindowSize(ImVec2(285, 70), ImGuiSetCond_Always);
-		ImGui::Begin("new", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-		std::string scoreText = "You died! Press space to try again";
-		float font_size = ImGui::GetFontSize() * scoreText.size() / 2;
+		ImGui::Begin("death_text", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+		const std::string scoreText = "You died! Press space to try again";
+		const float font_size = ImGui::GetFontSize() * scoreText.size() / 2;
 		ImGui::SameLine(
-        ImGui::GetWindowSize().x / 2 -
-        font_size + (font_size / 2)
-    );
+			ImGui::GetWindowSize().x / 2 -
+			font_size + (font_size / 2)
+		);
 
-		ImGui::Text( "You died! Press space to try again");
+		ImGui::Text("You died! Press space to try again");
 		ImGui::End();
 	}
 }
@@ -280,7 +276,6 @@ void AsteroidsGame::keyEvent(SDL_Event& event)
 {
 	if (playerIsAlive)
 	{
-
 		for (int i = 0; i < gameObjects.size(); i++)
 		{
 			gameObjects[i]->onKey(event);
@@ -299,21 +294,69 @@ void AsteroidsGame::keyEvent(SDL_Event& event)
 	}
 }
 
+void AsteroidsGame::generateStars()
+{
+	int starsPerRow = 30;
+	auto size = sre::Renderer::instance->getDrawableSize();
+	for (int x = 0; x <= size.x; x += size.x / starsPerRow)
+	{
+		for (int y = 0; y <= size.y; y += size.y / starsPerRow)
+		{
+
+			int star = rand() % 3;
+			int randPos = rand() % 50;
+			switch (star)
+			{
+			case 0:
+			{
+				auto star = std::make_shared<GameObject>(atlas->get("star1.png"));
+				star->position = glm::vec2(x + randPos, y + randPos);
+				star->scale = glm::vec2(0.1f, 0.1f);
+				backgroundSprites.push_back(star);
+				break;
+			}
+			case 1:
+			{
+				auto star = std::make_shared<GameObject>(atlas->get("star2.png"));
+				star->position = glm::vec2(x + randPos, y + randPos);
+				star->scale = glm::vec2(0.1f, 0.1f);
+				backgroundSprites.push_back(star);
+				break;
+			}
+			case 2:
+			{
+				auto star = std::make_shared<GameObject>(atlas->get("star3.png"));
+				star->position = glm::vec2(x + randPos, y + randPos);
+				star->scale = glm::vec2(0.1f, 0.1f);
+				backgroundSprites.push_back(star);
+				break;
+			}
+			}
+		}
+	}
+}
+
 void AsteroidsGame::restartGame()
 {
 	playerIsAlive = true;
 	score = 0;
 	gameObjects.clear();
+	backgroundSprites.clear();
 
 	auto spaceshipSprite = atlas->get("playerShip1_blue.png");
-	auto bigMeteorSprite = atlas->get("meteorBrown_big1.png");
 	auto spaceShipPointer = std::make_shared<SpaceShip>(spaceshipSprite, this);
 	gameObjects.push_back(spaceShipPointer);
 
+	generateStars();
+
+
+
 	for (auto i = 0; i < 5; i++)
 	{
-		gameObjects.push_back(std::make_shared<Asteroid>(bigMeteorSprite, this, Asteroid::Big));
+		spawnAsteroid(Asteroid::AsteroidSize::Big);
 	}
+
+
 
 }
 

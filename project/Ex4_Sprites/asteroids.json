@@ -2,7 +2,7 @@
 
 {
 	"filename": "bang.png",
-	"frame": {"x":101,"y":75,"w":120,"h":89},
+	"frame": {"x":0,"y":0,"w":120,"h":89},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":120,"h":89},
@@ -10,7 +10,7 @@
 },
 {
 	"filename": "laserRed15.png",
-	"frame": {"x":0,"y":0,"w":9,"h":57},
+	"frame": {"x":120,"y":0,"w":9,"h":57},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":57},
@@ -18,7 +18,7 @@
 },
 {
 	"filename": "meteorBrown_big1.png",
-	"frame": {"x":0,"y":75,"w":101,"h":84},
+	"frame": {"x":129,"y":0,"w":101,"h":84},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":101,"h":84},
@@ -26,7 +26,7 @@
 },
 {
 	"filename": "meteorBrown_med1.png",
-	"frame": {"x":37,"y":0,"w":43,"h":43},
+	"frame": {"x":0,"y":89,"w":43,"h":43},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":43,"h":43},
@@ -34,7 +34,7 @@
 },
 {
 	"filename": "meteorBrown_small1.png",
-	"frame": {"x":9,"y":0,"w":28,"h":28},
+	"frame": {"x":43,"y":89,"w":28,"h":28},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":28},
@@ -42,11 +42,35 @@
 },
 {
 	"filename": "playerShip1_blue.png",
-	"frame": {"x":80,"y":0,"w":99,"h":75},
+	"frame": {"x":71,"y":89,"w":99,"h":75},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":99,"h":75},
 	"sourceSize": {"w":99,"h":75}
+},
+{
+	"filename": "star1.png",
+	"frame": {"x":170,"y":89,"w":25,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":24},
+	"sourceSize": {"w":25,"h":24}
+},
+{
+	"filename": "star2.png",
+	"frame": {"x":195,"y":89,"w":25,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":24},
+	"sourceSize": {"w":25,"h":24}
+},
+{
+	"filename": "star3.png",
+	"frame": {"x":220,"y":89,"w":24,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
+	"sourceSize": {"w":24,"h":24}
 }],
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
@@ -55,6 +79,6 @@
 	"format": "RGBA8888",
 	"size": {"w":256,"h":256},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:9610bbdfa84e5da345bbb96f36780163:e8ab8528bc600d7313f11777e0ffcbf0:3cb2167982f406a3d6627570b02f9be7$"
+	"smartupdate": "$TexturePacker:SmartUpdate:5c2178eff37e807ee834d714c4e7635c:2109c43a0166b3069e18315fe1350b7b:3cb2167982f406a3d6627570b02f9be7$"
 }
 }

@@ -8,20 +8,16 @@
 #include "SpaceShip.hpp"
 #include "sre/Renderer.hpp"
 
-Laser::Laser(int id, const sre::Sprite& sprite, glm::vec2 position, glm::vec2 vel, float rotation, AsteroidsGame* game) : GameObject(sprite)
+Laser::Laser(const sre::Sprite& sprite, glm::vec2 position, glm::vec2 vel, float rotation, AsteroidsGame* game) : GameObject(sprite)
 {
-	this->id = id;
 	winSize = sre::Renderer::instance->getDrawableSize();
 	radius = 5;
 	spawnTime = time(nullptr);
+	
 	this->position = position;
 	this->rotation = rotation;
 	this->game = game;
-	//velocity = glm::vec2(direction.x * velocityFactor, direction.y * velocityFactor);
 	velocity = vel;
-	//velocity = glm::rotateZ(glm::vec3(0,100,0), glm::radians(rotation));
-
-
 }
 
 
@@ -54,6 +50,6 @@ void Laser::onCollision(std::shared_ptr<GameObject> other)
 	auto player = std::dynamic_pointer_cast<SpaceShip>(other);
 	if(player != nullptr)
 		return;
-	game->destroyLaser(this);
+	game->destroyGameObject(this);
 }
 

@@ -4,51 +4,51 @@
 #include "AsteroidsGame.hpp"
 #include "Laser.hpp"
 #include "SpaceShip.hpp"
-int Asteroid::nextId = nextId >= 1 ? nextId : 1;
 
-
-Asteroid::Asteroid(const sre::Sprite& sprite, AsteroidsGame* game, asteroidSize size, glm::vec2 pos) : GameObject(sprite)
+void Asteroid::initializeValues(AsteroidsGame* game, Asteroid::AsteroidSize size)
 {
-	this->id = ++nextId;
-	std::cout << std::to_string(nextId);
-	position = pos;
 	switch (size)
 	{
-	case Small:
+	case AsteroidSize::Small:
 		radius = 15;
 		break;
-	case Medium:
+	case AsteroidSize::Medium:
 		radius = 25;
 		break;
-	case Big:
+	case AsteroidSize::Big:
 		radius = 55;
 		break;
 	}
 	this->game = game;
 	this->size = size;
-
 	winSize = sre::Renderer::instance->getDrawableSize();
-	int maxRotation = 7;
+
+	constexpr int maxRotation = 7;
 	rotationSpeed = rand() % maxRotation;
 	rotationSpeed -= maxRotation / 2;
-	float maxVelocity = 3.0f;
-	if (pos == glm::vec2(-1, -1)) // If we don't input a pos value, give a random position
-	{
-		float randomPosX = (0 + 1) + (((float)rand()) / (float)RAND_MAX) * (winSize.x - (0 + 1));
-		float randomPosY = (0 + 1) + (((float)rand()) / (float)RAND_MAX) * (winSize.y - (0 + 1));
-		position = glm::vec2(randomPosX, randomPosY);
-	}
-	else
-	{
-		position = pos;
-	}
 
-
-	float velocityX = (-maxVelocity + 1) + (((float)rand()) / (float)RAND_MAX) * (maxVelocity - (-maxVelocity + 1));
-	float velocityY = (-maxVelocity + 1) + (((float)rand()) / (float)RAND_MAX) * (maxVelocity - (-maxVelocity + 1));
-
+	constexpr float maxVelocity = 3.0f;
+	const float velocityX = AsteroidsGame::getRandomFloat(-maxVelocity, maxVelocity); // (-maxVelocity + 1) + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (maxVelocity - (-maxVelocity + 1));
+	const float velocityY = AsteroidsGame::getRandomFloat(-maxVelocity, maxVelocity); //(-maxVelocity + 1) + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (maxVelocity - (-maxVelocity + 1));
 	velocity = glm::vec2(velocityX, velocityY);
+}
 
+
+Asteroid::Asteroid(const sre::Sprite& sprite, AsteroidsGame* game, AsteroidSize size, glm::vec2 pos) : GameObject(sprite)
+{
+	position = pos;
+	initializeValues(game, size);
+}
+
+
+
+Asteroid::Asteroid(const sre::Sprite& sprite, AsteroidsGame* game, AsteroidSize size) : GameObject(sprite)
+{
+	const float randomPosX = rand() % static_cast<int>(winSize.x);
+	const float randomPosY = rand() % static_cast<int>(winSize.y);
+	position = glm::vec2(randomPosX, randomPosY);
+
+	initializeValues(game, size);
 }
 
 #include "sre/Renderer.hpp"
@@ -82,16 +82,16 @@ void Asteroid::update(float deltaTime)
 
 void Asteroid::onCollision(std::shared_ptr<GameObject> other)
 {
-	auto laser = std::dynamic_pointer_cast<Laser>(other);
+	const auto laser = std::dynamic_pointer_cast<Laser>(other);
 	if (laser != nullptr)
 	{
 		game->destroyAsteroid(this);
 		return;
 	}
-	auto spaceShip = std::dynamic_pointer_cast<SpaceShip>(other); 
-	if(spaceShip != nullptr)
+	const auto spaceShip = std::dynamic_pointer_cast<SpaceShip>(other);
+	if (spaceShip != nullptr)
 	{
-		game->destroySpaceShip();
+		game->destroySpaceShip(spaceShip.get());
 	}
 
 

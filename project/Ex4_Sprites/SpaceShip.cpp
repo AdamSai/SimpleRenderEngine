@@ -2,6 +2,8 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include "SpaceShip.hpp"
 
+#include <chrono>
+
 #include "Asteroid.hpp"
 #include "AsteroidsGame.hpp"
 #include "sre/Renderer.hpp"
@@ -18,6 +20,7 @@ SpaceShip::SpaceShip(const sre::Sprite& sprite, AsteroidsGame* game) : GameObjec
 
 void SpaceShip::update(float deltaTime)
 {
+
 	if (thrust)
 	{
 		float acceleration = deltaTime * thrustPower;
@@ -29,6 +32,7 @@ void SpaceShip::update(float deltaTime)
 			velocity = velocity * (maxSpeed / speed);
 		}
 	}
+
 
 	else
 	{
@@ -90,11 +94,15 @@ void SpaceShip::onKey(SDL_Event& keyEvent)
 	{
 		rotateCW = keyEvent.type == SDL_KEYDOWN;
 	}
-	if (keyEvent.key.keysym.sym == SDLK_SPACE && (float)(time(nullptr) - lastShotTime) >= shootCooldown) 
+
+	if (keyEvent.key.keysym.sym == SDLK_SPACE && (game->GetCurrentTimeMillis() - lastShotTime) >= shootCooldown * 1000) 
 	{
-		lastShotTime = time(nullptr);
-		glm::vec2 direction = glm::rotateZ(glm::vec3(0, 5, 0), glm::radians(rotation));
+		lastShotTime = game->GetCurrentTimeMillis();
+		const glm::vec2 direction = glm::rotateZ(glm::vec3(0, 5, 0), glm::radians(rotation));
 		Laser(position, direction * 100.0f, rotation);
 	}
 
 }
+
+
+

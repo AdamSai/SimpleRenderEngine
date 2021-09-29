@@ -6,21 +6,21 @@
 class Asteroid : public GameObject, public Collidable
 {
 public:
-	int id;
-	enum asteroidSize
+	enum class AsteroidSize
 	{
 		Small,
 		Medium,
 		Big
 	};
-	Asteroid(const sre::Sprite& sprite, AsteroidsGame* game, asteroidSize size, glm::vec2 pos = glm::vec2(-1,-1));
+	Asteroid(const sre::Sprite& sprite, AsteroidsGame* game, AsteroidSize size, glm::vec2 pos);
+	void initializeValues(AsteroidsGame* game, AsteroidSize size);
+	Asteroid(const sre::Sprite& sprite, AsteroidsGame* game, AsteroidSize size);
 	void update(float deltaTime) override;
 	void onCollision(std::shared_ptr<GameObject> other) override;
-	asteroidSize size;
+	AsteroidSize size;
 
 
 private:
-	static int nextId;
 	float rotationSpeed;
 	AsteroidsGame* game;
 
