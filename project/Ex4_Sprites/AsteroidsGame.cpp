@@ -1,10 +1,6 @@
 ﻿#include <ctime>
 #include <glm/gtc/constants.hpp>
 #include "AsteroidsGame.hpp"
-#include "sre/Texture.hpp"
-#include "sre/Renderer.hpp"
-#include "sre/Material.hpp"
-#include "sre/SDLRenderer.hpp"
 
 #include "Asteroid.hpp"
 #include "GameObject.hpp"
@@ -180,13 +176,6 @@ void AsteroidsGame::update(float deltaTime)
 	for (int i = 0; i < gameObjects.size(); i++)
 	{
 		gameObjects[i]->update(deltaTime);
-
-		auto laser = std::dynamic_pointer_cast<Laser>(gameObjects[i]);
-		if (laser != nullptr)
-		{
-			if (time(nullptr) - laser->spawnTime > 1)
-				gameObjects.erase(gameObjects.begin() + i);
-		}
 	}
 }
 
@@ -349,14 +338,10 @@ void AsteroidsGame::restartGame()
 
 	generateStars();
 
-
-
 	for (auto i = 0; i < 5; i++)
 	{
 		spawnAsteroid(Asteroid::AsteroidSize::Big);
 	}
-
-
 
 }
 
